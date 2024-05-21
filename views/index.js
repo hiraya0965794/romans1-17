@@ -722,23 +722,7 @@ function updateDateTime() {
         alert("Please select both start and end dates before printing.");
     }
 }
-////// WEB SOCKET///////////
-const socket = io();
 
-        socket.on('connect', () => {
-            console.log('Connected to server');
-        });
-
-// UPDATE THE TABLE WITH NEW DATA RECEIVED FROM THE SERVER
-socket.on('newData', (data) => {
-    // APPEND THE NEW ROW TO THE TABLE
-    $('#dataTable tbody').prepend(`<tr><td>Sensor ${data.gauge}</td><td>${parseFloat(data.value).toFixed(2)} m</td><td>${data.updatedAt}</td></tr>`);
-});
-
-// LISTEN FOR THE EVENT INDICATING THAT DATA HAS BEEN DELETED ON THE SERVER
-socket.on('dataDeleted', (data) => {
-    console.log(data.message); // LOG THE MESSAGE RECEIVED FROM THE SERVER
-});
 
 
 </script>
