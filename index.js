@@ -1,6 +1,5 @@
 const express = require('express');
 const http = require('http');
-const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
 const path = require('path');
 const pool = require('./db');
@@ -10,7 +9,6 @@ const cron = require('node-cron');
 const PORT = 5000;
 const app = express();
 const server = http.createServer(app);
-const io = socketIO(server);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -120,16 +118,7 @@ cron.schedule('*/10 * * * *', async () => {
         console.error('Error deleting data:', error);
 }
 });
-////////////////////////
-// Socket.io CONNECTION EVENT
-io.on('connection', (socket) => {
-    console.log('A client connected');
-    
-    // HANDLE EVENTS FROM THE CLIENTS
-    socket.on('disconnect', () => {
-      console.log('A client disconnected');
-    });
-});
+
 
   ///////////////////
 //START SERVER
