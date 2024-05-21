@@ -538,7 +538,7 @@
     function updateGauges() {
     // AJAX REQUEST FOR EACH GAUGE
     $.ajax({
-        url: 'http://flood-sol.vercel.app:5000/fetch/1', // FETCHING DATA FOR GAUGE 1
+        url: 'http://romans1-17.vercel.app:5000/fetch/1', // FETCHING DATA FOR GAUGE 1
         method: 'GET',
         success: function (data) {
             drawGauge('gauge1', parseFloat(data.value)); // ASSUMING THE SERVER RETURNS THE GAUGE VALUE
@@ -549,7 +549,7 @@
     });
 
     $.ajax({
-        url: 'http://flood-sol.vercel.app:5000/fetch/2', //  FETCHING DATA FOR GAUGE 2
+        url: 'http://romans1-17.vercel.app:5000/fetch/2', //  FETCHING DATA FOR GAUGE 2
         method: 'GET',
         success: function (data) {
             drawGauge('gauge2', parseFloat(data.value)); // ASSUMING THE SERVER RETURNS THE GAUGE VALUE
@@ -559,7 +559,7 @@
         }
     });
     $.ajax({
-        url: 'http://flood-sol.vercel.app:5000/fetch/3', //  FETCHING DATA FOR GAUGE 3
+        url: 'http://romans1-17.vercel.app:5000/fetch/3', //  FETCHING DATA FOR GAUGE 3
         method: 'GET',
         success: function (data) {
             drawGauge('gauge3', parseFloat(data.value)); // ASSUMING THE SERVER RETURNS THE GAUGE VALUE
