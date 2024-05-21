@@ -1,0 +1,258 @@
+function drawGauge(canvasId, gaugeValue) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const centerX = width / 2;
+    const centerY = height;
+    const radius = Math.min(width, height) / 2 * 0.9;
+    const startAngle = Math.PI;
+    const endAngle = 2 * Math.PI;
+
+    ctx.clearRect(0, 0, width, height);
+    
+    // GAUGE BACKGROUND
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+    ctx.lineWidth = 20;
+    ctx.strokeStyle = '#ddd';
+    ctx.stroke();
+
+// GAUGE COLOR
+let color;
+let fillPercentage;
+
+if (gaugeValue >= 0 && gaugeValue <= 0.5) {
+    color = 'red';
+    fillPercentage = gaugeValue / 0.5;
+} else if (gaugeValue > 0.5 && gaugeValue <= 1.5) {
+    color = 'orange';
+    fillPercentage = (gaugeValue - 0.5) / 1; 
+} else if (gaugeValue > 1.5 && gaugeValue <= 2.5) {
+    color = 'yellow';
+    fillPercentage = (gaugeValue - 1.5) / 1; 
+} else if (gaugeValue > 2.5 ){
+    color = 'green';
+    fillPercentage = (gaugeValue - 2.5) / 2; 
+}
+
+    // FILL GAUGE
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, Math.PI, Math.PI + (endAngle - startAngle) * fillPercentage);
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+
+    // DISPLAY GAUGE VALUE
+    const valueString = (gaugeValue).toFixed(2) + " m";
+    ctx.fillStyle = color;
+    ctx.font = "bold 16px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "between";
+    ctx.fillText(valueString, centerX, centerY);
+}
+
+function updateGauges() {
+// AJAX REQUEST FOR EACH GAUGE
+$.ajax({
+    url: 'http://localhost:5000/fetch/1', // FETCHING DATA FOR GAUGE 1
+    method: 'GET',
+    success: function (data) {
+        drawGauge('gauge1', parseFloat(data.value)); // ASSUMING THE SERVER RETURNS THE GAUGE VALUE
+    },
+    error: function (xhr, status, error) {
+        console.error('Error fetching data for gauge 1:', error);
+    }
+});
+
+$.ajax({
+    url: 'http://localhost:5000/fetch/2', //  FETCHING DATA FOR GAUGE 2
+    method: 'GET',
+    success: function (data) {
+        drawGauge('gauge2', parseFloat(data.value)); // ASSUMING THE SERVER RETURNS THE GAUGE VALUE
+    },
+    error: function (xhr, status, error) {
+        console.error('Error fetching data for gauge 2:', error);
+    }
+});
+$.ajax({
+    url: 'http://localhost:5000/fetch/3', //  FETCHING DATA FOR GAUGE 3
+    method: 'GET',
+    success: function (data) {
+        drawGauge('gauge3', parseFloat(data.value)); // ASSUMING THE SERVER RETURNS THE GAUGE VALUE
+    },
+    error: function (xhr, status, error) {
+        console.error('Error fetching data for gauge 3:', error);
+    }
+});
+}
+
+// CALL THE FUNCTION INITIALLY TO FETCH AND UPDATE GAUGE DATA
+updateGauges();
+
+// UPDATE GAUGE EVERY SECOND
+setInterval(updateGauges, 1000);
+
+
+
+///////////SEARCH RESULT//////////////////
+// FUNCTION TO SUGGEST SEARCH RESULTS BASED ON USER INPUT
+function suggestSearch() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const table = document.getElementById('dataTable');
+        const rows = table.querySelectorAll('tbody tr');
+
+        let foundAnyRow = false;
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.querySelectorAll('td');
+            let foundInRow = false;
+
+            for (let j = 0; j < cells.length; j++) {
+                const cell = cells[j];
+                if (cell.textContent.toLowerCase().includes(input)) {
+                    foundInRow = true;
+                    break;
+                }
+            }
+
+            if (foundInRow) {
+                row.style.display = ''; // SHOW THE ROW
+                foundAnyRow = true;
+            } else {
+                row.style.display = 'none'; // HIDE THE ROW
+            }
+        }
+
+        const noDataMessage = document.getElementById('noDataMessage');
+        if (noDataMessage) {
+            noDataMessage.style.display = foundAnyRow ? 'none' : ''; // SHOW MESSAGE IF NO ROWS FOUND
+        }
+    }
+
+
+/////////////TABLE DATE AND TIME UPDATE//////////////
+// FUNCTION TO UPDATE THE DATE AND TIME IN THE TABLE CELLS
+function updateDateTime() {
+    const table = document.getElementById('dataTable');
+    const rows = table.querySelectorAll('tbody tr');
+
+    rows.forEach(row => {
+        const timeCell = row.querySelector('.date_time'); // ASSUMING THIS IS THE CLASS OF CELL CONTAINING THE TIME
+        const dateString = timeCell.textContent.trim(); // GET THE DATE STRING
+        const date = new Date(dateString); //PARSE THE DATA STRING
+
+        // FORMAT THE DATE COMPONENTS
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // ADDING 1 BECAUSE MONTHS ARE ZERO-INDEXED
+        const day = date.getDate().toString().padStart(2, '0');
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = date.getSeconds().toString().padStart(2, '0');
+
+        // CONSTRUCT THE FORMATTED DATE AND TIME 
+        const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+        // UPDATE THE CONTENT WITH FORMATTED DATE AND TIME
+        timeCell.textContent = formattedDateTime;
+    });
+}
+
+// CALL THE FUNCTION INITIALLY TO UPDATE THE TABLE
+updateDateTime();
+
+////////////PRINTING DATA//////
+// FUNCTION TO PRINT DATA WITHIN THE SPECIFIED DATE RANGE
+function printDataWithinRange() {
+// GET THE START DAT VALUE
+const startDate = document.getElementById('startDate').value;
+
+// GET THE NED DATE VALUES
+const endDate = document.getElementById('endDate').value;
+
+// CHECK IF BOTH START AND END DATES ARE FILLED
+if (startDate && endDate) {
+    // HIDE ALL UNNECESSARY ELEMENTS BEFORE PRINTING
+    const unnecessaryElements = document.querySelectorAll('.gauge, video');
+    unnecessaryElements.forEach(element => {
+        element.style.display = 'none';
+    });
+
+    // HIDE ALL ROWS INITIALLY
+    const rows = document.querySelectorAll('#dataTable tbody tr');
+    rows.forEach(row => {
+        row.style.display = 'none';
+    });
+
+    // SHOW THE HEADER ROW
+    const headerRow = document.querySelector('#dataTable tbody tr:first-child');
+    if (headerRow) {
+        headerRow.style.display = '';
+    }
+
+    // SHOW THE WATER LEVEL ROW
+    const waterLevelRow = document.querySelector('.water-level-row');
+    if (waterLevelRow) {
+        waterLevelRow.style.display = '';
+    }
+
+    // FILTER AND SHOW ROWS WITHIN THE DATE RANGE
+    rows.forEach(row => {
+        const date_Time = row.querySelector('.date_time').textContent.trim().split(' ')[0]; // EXTRACTING THE DATE PART
+        if (date_Time >= startDate && date_Time <= endDate) {
+            row.style.display = ''; // SHOW THE ROW IF IT FALLS WITHIN THE SPECIFIED RANGE
+        }
+    });
+
+    // PRINT THE CONTENT
+    window.print();
+
+    
+    // RESET THE DISPLAY PROPERTY AFTER PRINTING
+    rows.forEach(row => {
+        row.style.display = '';
+    });
+
+    // SHOW THE WATER LEVEL ROW AFTER PRINTING
+    if (waterLevelRow) {
+        waterLevelRow.style.display = 'none';
+    }
+
+    // SHOW UNNECESSARY ELEMENTS AGAIN AFTER PRINTING
+    unnecessaryElements.forEach(element => {
+        element.style.display = '';
+    });
+
+    // DETECT WHEN THE PRINT DIALOG IS CLOSED
+    const mediaQueryList = window.matchMedia('print');
+    mediaQueryList.addListener(mql => {
+        if (!mql.matches) {
+            //PRINT DIALOG CLOSED
+            console.log('Print dialog closed');
+            // RELOAD THE PAFE AFTER PRINTING IF CANCELED
+            window.location.reload();
+        }
+    });
+} else {
+    // SHOW AN ALERT IF BOTH START AND END DATES ARE NOT SELECTED
+    alert("Please select both start and end dates before printing.");
+}
+}
+////// WEB SOCKET///////////
+const socket = io();
+
+    socket.on('connect', () => {
+        console.log('Connected to server');
+    });
+
+// UPDATE THE TABLE WITH NEW DATA RECEIVED FROM THE SERVER
+socket.on('newData', (data) => {
+// APPEND THE NEW ROW TO THE TABLE
+$('#dataTable tbody').prepend(`<tr><td>Sensor ${data.gauge}</td><td>${parseFloat(data.value).toFixed(2)} m</td><td>${data.updatedAt}</td></tr>`);
+});
+
+// LISTEN FOR THE EVENT INDICATING THAT DATA HAS BEEN DELETED ON THE SERVER
+socket.on('dataDeleted', (data) => {
+console.log(data.message); // LOG THE MESSAGE RECEIVED FROM THE SERVER
+});
